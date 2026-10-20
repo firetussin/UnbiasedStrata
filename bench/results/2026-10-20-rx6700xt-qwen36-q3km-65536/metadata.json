@@ -1,0 +1,10 @@
+{
+ "backend":"HIP gfx1031", "gpu":"AMD Radeon RX 6700 XT", "gpu_vram_mib":12272,
+ "cpu":"AMD Ryzen 5 3600", "installed_ram_gib":32, "engine_threads":8,
+ "cpu_quota":"Inference 9 CPUs; separate benchmark client 1 CPU", "memory_limit_gib":26,
+ "kv":"engine defaults with --kv-whole", "vram_reserve_mib":1024, "tail_skip":6,
+ "draft":"engine default; no explicit draft override", "model_file":"Qwen3.6-35B-A3B-UD-Q3_K_M.gguf",
+ "corpus_commit":"26e4cb5df7996edfb5ff549a63b82d8581e1e658",
+ "model_settings":"thinking disabled; conversation-cache-mib 0; expert profile reused from prior model run",
+ "notes":"Native nonroot offline inference; CPU frontend and HIP engine. Client runs separately in the same network namespace with no GPU access, 1 CPU and 1 GiB. No background builds. No power or peak-memory measurement."
+}

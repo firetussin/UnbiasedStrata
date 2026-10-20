@@ -1,0 +1,75 @@
+RX 6700 XT 12 GB / Ryzen 5 3600 / Qwen3.6 UD-Q3_K_M
+Measured 2026-10-20. Speed protocol: unbiased-native-speed-1.
+
+Engine: fe3b461183561150db3559c726292a33b64c1980 (upstream
+1fa9006b409595266a269471fe531a60971ea501 plus HIP Makefile support).
+Pinned llama.cpp: a6de9af3b19b5e3a5397f2c835a29a13c37664bd.
+Measured benchmark client: b04952944883a7d4fa811117e2b02d63bc96a19f.
+The later generated-fallback word-count metadata fix does not affect these
+runs: all five agent files came from the explicit public repository corpus.
+
+Native build:
+  make build BACKEND=hip HIP_ARCHS=gfx1031 JOBS=2 [local ROCm prefix/compiler options]
+  make frontend JOBS=2
+  make bench JOBS=2
+  make test-bench JOBS=2
+
+Actual engine flags (set CONTEXT to this folder's results.json context):
+  --model "$MODEL" --max-context "$CONTEXT"
+  --expert-profile "$WRITABLE_PROFILE_COPY"
+  --conversation-cache-mib 0 --tail-skip 6 --kv-whole --threads 8
+  --vram-reserve-mib 1024
+No explicit draft override: actual engine defaults remain enabled, with
+offered/accepted draft counters in each result. fixed_mtp is not used here.
+Copy ../profiles/qwen36-q3km-dde70d65.txt into a fresh writable output before launch;
+the engine can update it. Its lines are only three integer counters.
+
+CPU-built native frontend launch, forwarding those flags after --:
+  unbiased-strata --engine "$ENGINE" -m "$MODEL" --host 127.0.0.1
+    --port 18091 --alias qwen3.6-35b-a3b-ud-q3_k_m --threads 8
+    --chat-template-kwargs '{"enable_thinking":false}' -- [engine flags above]
+
+Native client:
+  unbiased-bench --url http://127.0.0.1:18091
+    --model qwen3.6-35b-a3b-ud-q3_k_m --runs 3 --long --clients 2
+    --engine-commit fe3b461183561150db3559c726292a33b64c1980
+    --model-sha256 8966dd0cd8c543c4228490a2a8b0e0814fc4f1e6a8e199ceed4de6754ae7b8e1
+    --metadata metadata.json --corpus-dir "$PUBLIC_POLYSTRATA_CHECKOUT"
+    --out "$NEW_RESULT_DIRECTORY"
+Public corpus: VecSzn/PolyStrata commit
+26e4cb5df7996edfb5ff549a63b82d8581e1e658; only README.md and the named public
+docs are read. File fingerprints and actual word counts are in results.json.
+The 32K-context run explicitly skips the 32K-input stage for lack of headroom.
+
+Runtime limits: unprivileged Debian 13 LXC, 10 logical CPUs / 28 GiB / no swap.
+Native inference Docker: CPU-only C++ frontend + HIP gfx1031 strata-poly,
+nonroot UID 65534, network none, read-only root/models/builds/ROCm libraries,
+writable output and /tmp, default seccomp, all capabilities dropped,
+no-new-privileges, only kfd/render device access; 9 CPU quota / 26 GiB / no swap.
+No Python interpreter in this serving image; no Python serving process.
+Separate native-client Docker shares the offline network namespace, has no
+GPU devices, 1 CPU / 1 GiB / no swap, same root/capability/security constraints.
+ROCm SDK core/devel and gfx103X library bundle version 7.13.0a20260515 were
+reused as binary libraries/compiler inputs; no Python wheel loader is run in
+the serving image. No driver,
+kernel or inference-kernel source changes. No concurrent builds or inference.
+No controlled power, thermal, peak-memory or cross-engine A/B claim.
+
+SHA256:
+  initial expert profile (three integer columns only)
+    dde70d65c6f45a1bbcb7e600a905893038c18089a04a2261aa0935e2a239fc99
+  Qwen3.6-35B-A3B-UD-Q3_K_M.gguf
+    8966dd0cd8c543c4228490a2a8b0e0814fc4f1e6a8e199ceed4de6754ae7b8e1
+  strata-poly
+    ccaca088525289b7928a3064380d0d49bc08f7271bb43a2d0a39d41379d6b7f2
+  unbiased-strata (CPU frontend)
+    39532956c45e23306f4f27013d6789272418b0e26e70a533e2d6fcdaf9d400df
+  unbiased-bench (measured b049529 build)
+    2c32ff75d1b9086b4516dff6217034262bf1f3aee86b4126c8a03701b8aaf0df
+
+The benchmark and server were already loaded; model loading is excluded.
+Both contexts completed with exit 0 and no failed requests. Request journals
+include excluded warm-ups and calibration. The supplied card/CPU metadata
+describes inference hardware; /proc/cgroup observations describe the client.
+Generated answers, raw engine logs, private host details, quality benchmarks
+and model weights are intentionally absent from these community results.
