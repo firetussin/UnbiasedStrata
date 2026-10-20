@@ -2164,6 +2164,8 @@ if(STRATA_FRONTEND AND STRATA_NATIVE_EXPERTS)
   target_link_libraries(unbiased-strata PRIVATE strata_llama_server)
   target_compile_features(unbiased-strata PRIVATE cxx_std_20)
 
+  # POSIX client/test process APIs; don't add an unsupported target to Windows builds.
+  if(UNIX)
   # Native HTTP benchmark client and its native mock-server tests; no Python or GPU toolkit needed.
   execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                   OUTPUT_VARIABLE _bench_commit OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
@@ -2184,6 +2186,7 @@ if(STRATA_FRONTEND AND STRATA_NATIVE_EXPERTS)
   target_include_directories(native_bench_test PRIVATE ${STRATA_GGML_DIR}/vendor/nlohmann ${STRATA_GGML_DIR}/vendor/cpp-httplib)
   target_link_libraries(native_bench_test PRIVATE cpp-httplib Threads::Threads)
   target_compile_features(native_bench_test PRIVATE cxx_std_20)
+  endif()
 
   # The engine adapter against the fake engine (frontend/tests/fake-engine.py): no GPU, no model, no llama.cpp.
   # `make test` builds and runs it, then frontend/tests/e2e.sh against the binary above.

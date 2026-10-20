@@ -2,6 +2,7 @@
 
 `unbiased-bench` is a C++ HTTP client. It needs no Python interpreter, model weights, GPU toolkit or inference
 engine on the client. Build it from the pinned submodule with a C++20 compiler and CMake:
+The client and native tests use POSIX APIs and have been validated on Linux. Windows builds do not add these targets.
 
 ```sh
 git submodule update --init
