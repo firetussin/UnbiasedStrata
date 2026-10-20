@@ -51,6 +51,25 @@ make build                           # build/bin/{strata,strata-poly,libstrata_k
 make test                            # the front end against a fake engine; no GPU, no model
 ```
 
+### AMD / HIP build
+
+The Makefile defaults to CUDA. To build the existing HIP backend on Linux without requiring `nvcc`, select it
+explicitly and set the architecture for your card:
+
+```sh
+make build BACKEND=hip HIP_ARCHS=gfx1031 ROCM_PATH=/opt/rocm JOBS=2
+```
+
+This example targets the RX 6700 XT (`gfx1031`); the RX 6800 / 6900 family uses `gfx1030`. It requires a local ROCm
+development toolkit with HIP, hipBLAS and their CMake packages. `HIP_CXX=/path/to/clang++` overrides the compiler;
+otherwise the Makefile uses `ROCM_PATH/llvm/bin/clang++` when present and lets CMake discover it otherwise.
+`CMAKE_EXTRA` remains available for additional CMake options. Use a separate `BUILD_DIR` when switching backends.
+The build does not download the toolkit or models. The resulting request path is the C++ front end and native
+engine; selecting HIP does not add a Python serving dependency.
+
+HIP remains experimental for this fork: a successful build is not a substitute for checking real-model inference
+and the target GPU's results. The frontend-only target (`make frontend`) still needs no GPU toolkit.
+
 ## Run
 
 ```
