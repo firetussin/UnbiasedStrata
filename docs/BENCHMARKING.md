@@ -97,6 +97,7 @@ By default, agent files are deterministic generated fallback documents. With `--
 public-document names and750-word minimum/1,500-word maximum as the upstream client are considered, then missing
 documents are filled deterministically. Only five files are used. Record the corpus revision; result data contains
 file names, word counts and FNV-1a64 fingerprints (content identifiers, **not cryptographic checksums**).
+Generated fallback bodies contain1,500 seeded words plus18 instruction words; the recorded count includes both.
 Do not point this option at private material. Model answers remain in memory solely to continue each session;
 they are not saved as chat transcripts. The tool schemas are never executed, so this is not an agent-quality test.
 

@@ -132,7 +132,11 @@ std::vector<CorpusFile> corpus(const fs::path & dir) {
             if(count>=750)files.push_back({name,body,count});
         }
     }
-    for(int i=0;files.size()<5;++i)files.push_back({"generated/part"+std::to_string(i)+".txt",nb::long_prompt(1500),1500});
+    for(int i=0;files.size()<5;++i) {
+        auto body=nb::long_prompt(1500);std::istringstream input(body);std::string word;size_t count=0;
+        while(input>>word)++count;
+        files.push_back({"generated/part"+std::to_string(i)+".txt",body,count});
+    }
     files.resize(5);return files;
 }
 

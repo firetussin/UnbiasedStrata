@@ -87,6 +87,7 @@ int main(int argc,char ** argv) {
         check(result["complete"].get<bool>() && result["results"]["failures"].empty(),"complete successful result");
         check(result["results"]["chat"]["requests"].size()==3 && result["results"]["prompts"].size()==3,"chat and prompt workload counts");
         check(result["results"]["agent"]["sessions"][0].size()==6 && result["results"]["clients"]["rounds"][0]["requests"].size()==2,"agent/concurrency workload counts");
+        check(result["agent_corpus"][0]["words"]==1518,"generated corpus word count includes its instructions");
         check(nb::read_file(output/"results.json").find("192.168.1.3")==std::string::npos,"public report scrubs IP");
         check(command({argv[1],"--url",mock.url(),"--out",output.string()})!=0,"refuse overwrite");
         auto broken=temp/"failed";
