@@ -82,11 +82,20 @@ build: configure
 	@echo "built:"; ls -1 $(BUILD_DIR)/bin/strata $(BUILD_DIR)/bin/strata-poly $(if $(KQ_TARGET),$(BUILD_DIR)/bin/libstrata_kq.so,) $(BUILD_DIR)/bin/unbiased-strata
 
 # The front end alone, without CUDA: for a laptop or a CI box. Needs only a C++20 compiler and CMake.
-.PHONY: frontend
-frontend:
-	cmake -S . -B $(BUILD_DIR)-frontend -DCMAKE_BUILD_TYPE=Release -DSTRATA_ENABLE_CUDA=OFF -DSTRATA_BUILD_TESTS=OFF \
+.PHONY: frontend configure-frontend bench test-bench
+configure-frontend:
+	cmake -S . -B $(BUILD_DIR)-frontend -DCMAKE_BUILD_TYPE=Release -DSTRATA_ENABLE_CUDA=OFF -DSTRATA_ENABLE_HIP=OFF -DSTRATA_BUILD_TESTS=OFF \
 	      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=$(abspath $(BUILD_DIR))-frontend/bin $(CMAKE_EXTRA)
+
+frontend: configure-frontend
 	cmake --build $(BUILD_DIR)-frontend -j $(JOBS) --target unbiased-strata
+
+bench: configure-frontend
+	cmake --build $(BUILD_DIR)-frontend -j $(JOBS) --target unbiased-bench
+
+test-bench: bench
+	cmake --build $(BUILD_DIR)-frontend -j $(JOBS) --target native_bench_test
+	$(BUILD_DIR)-frontend/bin/native_bench_test $(abspath $(BUILD_DIR))-frontend/bin/unbiased-bench
 
 # The front end's tests, against a fake engine (frontend/tests/fake-engine.py): the adapter's cases (cancel, drain,
 # backpressure, child exit, ERR) and the HTTP surface a coding agent touches (frontend/tests/e2e.sh).  Needs python3

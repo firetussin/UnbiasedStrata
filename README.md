@@ -134,6 +134,12 @@ not fetch them. The files that have been served, with sizes and SHA-256, are in
 
 ## Measured
 
+Native, Python-free community speed client: `make bench` and `make test-bench`, then run
+`build-frontend/bin/unbiased-bench --url http://127.0.0.1:8080 --model <alias> --runs 3 --long`.
+It measures chat, calibrated fresh prompts, agent-style sessions and optional concurrency, and writes a reviewable
+community report. Protocol lineage, differences from the upstream tool, reproducibility metadata and submission
+instructions: [docs/BENCHMARKING.md](docs/BENCHMARKING.md).
+
 Each number came from a run directory with the command, the raw client output, the server log and the model files'
 checksums; the per-run records were removed from the tree on 2026-10-19 and are in git history at commit 7551f138 (`git checkout 7551f138 -- bench/unbiased bench/results`). What stays in `bench/` is
 reusable tooling only: upstream's `bench_vs_llama.py` and its corpus, the kernel probes, and `bench/correctness/`, the

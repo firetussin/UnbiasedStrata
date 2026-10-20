@@ -2164,6 +2164,27 @@ if(STRATA_FRONTEND AND STRATA_NATIVE_EXPERTS)
   target_link_libraries(unbiased-strata PRIVATE strata_llama_server)
   target_compile_features(unbiased-strata PRIVATE cxx_std_20)
 
+  # Native HTTP benchmark client and its native mock-server tests; no Python or GPU toolkit needed.
+  execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                  OUTPUT_VARIABLE _bench_commit OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+  if(NOT _bench_commit)
+    set(_bench_commit "unknown")
+  endif()
+  execute_process(COMMAND git diff --quiet WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                  RESULT_VARIABLE _bench_dirty ERROR_QUIET)
+  if(_bench_dirty)
+    string(APPEND _bench_commit "-dirty")
+  endif()
+  add_executable(unbiased-bench bench/native_bench.cpp)
+  target_include_directories(unbiased-bench PRIVATE ${STRATA_GGML_DIR}/vendor/nlohmann ${STRATA_GGML_DIR}/vendor/cpp-httplib)
+  target_link_libraries(unbiased-bench PRIVATE cpp-httplib Threads::Threads)
+  target_compile_features(unbiased-bench PRIVATE cxx_std_20)
+  target_compile_definitions(unbiased-bench PRIVATE STRATA_BENCH_COMMIT="${_bench_commit}")
+  add_executable(native_bench_test EXCLUDE_FROM_ALL bench/native_bench_test.cpp)
+  target_include_directories(native_bench_test PRIVATE ${STRATA_GGML_DIR}/vendor/nlohmann ${STRATA_GGML_DIR}/vendor/cpp-httplib)
+  target_link_libraries(native_bench_test PRIVATE cpp-httplib Threads::Threads)
+  target_compile_features(native_bench_test PRIVATE cxx_std_20)
+
   # The engine adapter against the fake engine (frontend/tests/fake-engine.py): no GPU, no model, no llama.cpp.
   # `make test` builds and runs it, then frontend/tests/e2e.sh against the binary above.
   add_executable(engine_test EXCLUDE_FROM_ALL frontend/tests/engine_test.cpp)
